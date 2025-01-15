@@ -6,6 +6,18 @@
  */
 
 #include <Servo.h>
+#include <SoftwareSerial.h>
+
+//Define RX and TX pins
+#define BT_RX_PIN 2
+#define BT_TX_PIN 3
+
+// Create SoftwareSerial object for Bluetooth communication
+SoftwareSerial bluetoothSerial(BT_RX_PIN, BT_TX_PIN); 
+// Buffer for receiving data
+const int BUFFER_SIZE = 64;
+char dataBuffer[BUFFER_SIZE];
+int bufferIndex = 0;
 
 // Motor A (Left) pins
 #define IN1 4  // Motor A direction control 1
@@ -38,12 +50,15 @@ Servo servoHead;
 int currentDistance = 0;
 int leftDistance = 0;
 int rightDistance = 0;
-char command;
+char recievedChar;
 
 void setup() {
   // Initialize serial communication
   Serial.begin(9600);
   
+  //Initialise Bluetooth Serial
+  bluetoothSerial.begin(9600);
+  Serial.println("Bluetooth Communication Ready for Communication");
   // Configure motor control pins
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
@@ -67,16 +82,31 @@ void setup() {
 }
 
 void loop() {
-  if (Serial.available() > 0) {
-    // Manual control via Bluetooth
-    command = Serial.read();
-    handleCommand(command);
-  } else {
-    // Autonomous mode
+  if(bluetoothSerial.available() >0){
+    char recievedchar=bluetoothSerial.read();
+    processmsg(recievedchar);
+    delay(20);
+  }
+  else{
     autonomousMode();
   }
 }
 
+void processmsg(char recievedchar){
+  if(recievedChar == '\n'){
+    dataBuffer[bufferIndex]='\0'; //terminating the char array
+
+    if(bufferIndex >0){
+      handleCommand(dataBuffer);
+    }
+
+    bufferIndex=0; //Reseting the Buffer Index
+  }
+  else if(bufferIndex < BUFFER_SIZE-1){
+    dataBuffer[bufferIndex]=recievedChar;
+    bufferIndex++;
+  }
+}
 void autonomousMode() {
   currentDistance = getDistance();
   
