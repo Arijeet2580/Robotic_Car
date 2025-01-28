@@ -10,7 +10,7 @@ An autonomous robot car that can navigate through its environment while avoiding
 - **Multiple Control Modes**: 
   - Autonomous mode for self-navigation
   - Manual control via Bluetooth
-  - Voice control support
+    
 - **Intelligent Maneuvers**: Smart turning and path-finding algorithms
 - **Variable Speed Control**: Adjustable speed settings for different situations
 - **Status Indicators**: LED indicators for different states and operations
